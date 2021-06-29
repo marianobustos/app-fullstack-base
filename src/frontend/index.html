@@ -26,8 +26,9 @@
                 <div class="row">
        
                     <div class="col l2 s12 m6">
-                    <!-- utilizo el ID al final porque sino en el evento me toma el proceso hijo y no me carga el ID que quiero -->
-                    <a class="btn-floating btn-large waves-effect waves-light green"><i class="material-icons" id="nuevoDisp">add</i>add</a>
+                        <a id="nuevoDisp" class="waves-effect waves-light modal-trigger btn" href="#modalNvoDisp">Nuevo Dispositivo</a>
+                        <!-- utilizo el ID al final porque sino en el evento me toma el proceso hijo y no me carga el ID que quiero -->
+                    <!-- <a class="btn-floating btn-large waves-effect waves-light green"><i class="material-icons" id="nuevoDisp" href="#modalNvoDisp">add</i>add</a> -->
                     </div>
                 <div class="col l8 s12 m12">
                     <p id="lista"></p>
@@ -37,6 +38,57 @@
                 </div>
             </div>	
         </main>
+        <!-- Formulario Modal  -->
+        <div id="modalNvoDisp" class="modal modal-fixed-footer">
+            <form id="formadd" method="POST" action="#">
+            <div class="modal-content">
+                
+                <h4><span id="titulo_modal"></span> Nuevo Dispositivo</h4>
+                <div class="row">
+                    <div class="row">
+                    <div class="input-field col s12">
+                        <input placeholder="Nombre" id="nombre_dispositivo" type="text" class="validate">
+                        <label for="nombre">Nombre</label>
+                    </div>
+                    </div>
+                    <div class="row">
+                    <div class="input-field col s12">
+                        <input placeholder="Descripción"  id="descripcion_dispositivo" type="text" class="validate">
+                        <label for="descrip_dis">Descripción</label>
+                    </div>
+                    </div>
+                    <div class="row">
+                    <div class="input-field col s12" id="select">
+                        <select id="tipo_dispositivo">
+                        <option value="" selected disabled>Seleccionar</option>
+                        <option value="0">On/Off</option>
+                        <option value="1">Dimerizable</option>
+                        </select>
+                        <label>Tipo</label>
+                    </div>
+                    <span><input id="id_dispositivo" type="text" hidden></span>
+                    </div>
+                </div>
+            </div>
+            </form>
+            <div class="modal-footer">
+                <a href="#!" class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">close</i>Cancelar</a>
+                <a href="#!" class="btn-floating btn-large waves-effect waves-light green"><i class="material-icons" id="nuevoDisp">check</i>Guardar</a>
+            </div>
+            </form>
+        </div>
+
+        <!-- Scripts de inicialización -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var form_modal = document.querySelectorAll('.modal');
+                var instances_mod = M.Modal.init(form_modal, {opacity:0.6});
+                var elem_select=document.querySelectorAll('select')
+                var instances_sel = M.FormSelect.init(elem_select, {});
+            });
+        </script>
+
+
 		<!-- Page Footer -->
         <footer class="page-footer" style="background-color:#6a6e74">
             <div class="container">

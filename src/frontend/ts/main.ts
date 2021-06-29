@@ -127,7 +127,9 @@ window.addEventListener("load", ()=> {
     let miObjMain: Main = new Main();
     miObjMain.main();
     let btnNvoDisp: HTMLElement = miObjMain.myFramework.getElementById("nuevoDisp");
-    btnNvoDisp.addEventListener("dblclick", miObjMain);
+    btnNvoDisp.addEventListener("click", miObjMain);
+    let modal = miObjMain.myFramework.getElementById("modalNvoDisp");
+    modal.addEventListener("click", miObjMain);
     
 });
 
