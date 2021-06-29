@@ -3,7 +3,7 @@ class Main implements EventListenerObject, HandlerPost{
     public main(): void {
         console.log("Se ejecuto el metodo main!!!");
         this.myFramework = new MyFramework();
-      
+        this.actualizarDispositivos();  // Actualizo la lista de dispositivos desde el servidor
     }
     public mostrarLista() {
         let listaUsr: Array<User> = new Array<User>();
@@ -21,85 +21,113 @@ class Main implements EventListenerObject, HandlerPost{
             listaUsr[obj].printInfo();
         }
     }
-    public handleEvent(ev: Event) {
 
-        alert("Se hizo click!");
-    
-
-        let objetoClick: HTMLElement = <HTMLElement>ev.target;
-        
-        if (objetoClick.textContent == "Listar") {
-            
-            let xhr: XMLHttpRequest = new XMLHttpRequest();
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState == 4) {
-                    if (xhr.status == 200) {
-                        console.log("Llego la respuesta!!!!");
-                        console.log(xhr.responseText);
-
-                        let listaDis: Array<Device> = JSON.parse(xhr.responseText);
-                        
-                        for (let disp of listaDis ){
-                        
-                            let listaDisp = this.myFramework.getElementById("listaDisp");
-                            listaDisp.innerHTML += `<li class="collection-item avatar">
-                            <img src="./static/images/lightbulb.png" alt="" class="circle">
-                            <span class="nombreDisp">${disp.name}</span>
-                            <p>${disp.description}
-                            </p>
-                            <a href="#!" class="secondary-content">
-                                <div class="switch">
-                                    <label >
-                                      Off
-                                      <input id="disp_${disp.id}" type="checkbox">
-                                      <span class="lever"></span>
-                                      On
-                                    </label>
-                                  </div>
-                            </a>
-                          </li>`;
-                         
-                            
+//PROCEDIMIENTO AJAX PARA MOSTRAR LOS DISPOSITIVOS EN EL DASHBOAR DE LA PAGINA
+public actualizarDispositivos() {
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+                let listaDis = JSON.parse(xhr.responseText);
+                let listaDisp = this.myFramework.getElementById("listaDisp");
+                listaDisp.innerHTML = "";
+                for (let disp of listaDis) {
+                    //DEPENDIENDO DEL TIPO MUESTRO UN INNERHTML U OTRO.
+                    if (disp.type == 1) {
+                        //ESTEINNER ES PARA LOS DIMMERS
+                        listaDisp.innerHTML += `<li class="collection-item avatar">
+                        <img src="./static/images/persiana.png" alt="" class="circle">
+                        <span id="nombre_${disp.id}" class="nombreDisp">${disp.name}</span>
+                        <p id="descripcion_${disp.id}">${disp.description}
+                        </p>
+                        <a href="#!" class="secondary-content">
+                            <div>
+                                <div>
+                                    <p class="range-field">
+                                        <input type="range" name="range" id="rango_${disp.id}" min="0" max="100" value="${disp.state}"/>
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                        <input id="tipodispositivo_${disp.id}" type="text" value="${disp.type}" hidden>
+                        <a class="btn-floating btn-large waves-effect waves-light grey"><i class="material-icons" id="edit_${disp.id}">edit</i>edit</a>
+                        <a class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons" id="delete_${disp.id}">delete</i>delete</a>
+                      </li>`;
+                    }
+                    else {
+                        let estado = "";
+                        if (disp.state) {
+                            estado = "checked";
                         }
-
-                        for (let disp of listaDis) {
-                            let checkDisp = this.myFramework.getElementById("disp_" + disp.id);
-                            checkDisp.addEventListener("click", this);
-                        }
-                    } else {
-                        alert("error!!")
+                        //ESTE INNER ES PARA LOS DISPOSITIVOS TIPO ON/OFF
+                        listaDisp.innerHTML += `<li class="collection-item avatar">
+                        <img src="./static/images/lightbulb.png" alt="" class="circle">
+                        <span id="nombre_${disp.id}" class="nombreDisp">${disp.name}</span>
+                        <p id="descripcion_${disp.id}">${disp.description}
+                        </p>
+                        <a href="#!" class="secondary-content">
+                            <div class="switch">
+                                <label >
+                                    Off
+                                    <input id="check_${disp.id}" type="checkbox" ${estado} >
+                                    <span class="lever"></span>
+                                    On
+                                </label>
+                            </div>
+                        </a>
+                        <input id="tipodispositivo_${disp.id}" type="text" value="${disp.type}" hidden>
+                        <a class="btn-floating btn-large waves-effect waves-light grey"><i class="material-icons" id="edit_${disp.id}">edit</i>edit</a>
+                        <a class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons" id="delete_${disp.id}">delete</i>delete</a>
+                        </li>`;
                     }
                 }
+                //RECORRO TODA LA LISTA DE DISPOSITIVOS Y CREO LOS EVENT LISTENERS
+                for (let disp of listaDis) {
+                    if (disp.type == 1) {
+                        //Listener persianas
+                        let rangeDisp = this.myFramework.getElementById("rango_" + disp.id);
+                        rangeDisp.addEventListener("change", this);
+                    }
+                    else {
+                        //Listener on/off
+                        let checkDisp = this.myFramework.getElementById("check_" + disp.id);
+                        checkDisp.addEventListener("click", this); 
+                    }
+                    //LISTENERS DE BOTONES EDITAR Y BORRAR
+                    let editar = this.myFramework.getElementById("edit_" + disp.id);
+                    editar.addEventListener("click", this);
+                    let borrar = this.myFramework.getElementById("delete_" + disp.id);
+                    borrar.addEventListener("click", this);
+                }
             }
-            xhr.open("GET","http://localhost:8000/devices",true)
-            xhr.send();
-            console.log("Ya hice el request!!")
-
-        } else {         
-            let checkBox: HTMLInputElement = <HTMLInputElement>ev.target;
-            alert(checkBox.id + " - " + checkBox.checked);
-
-            let datos = {"id":checkBox.id,"status":checkBox.checked}
-            this.myFramework.requestPOST("http://localhost:8000/devices", this,datos);
-
+            else {
+                alert("error!!");
+            }
         }
-    }
+    };
+    xhr.open("POST", "http://localhost:8000/devices", true);
+    xhr.send();
+}
 
-    responsePost(status: number, response: string) {
-        alert(response);
-    }
+
+
+
+public handleEvent(ev: Event) {
+    let objetoClick: HTMLInputElement = <HTMLInputElement>ev.target;
+    console.log(objetoClick);
+}
+
+responsePost(status: number, response: string) {
+    alert(response);
+}
 
     
 }
 window.addEventListener("load", ()=> {
     let miObjMain: Main = new Main();
     miObjMain.main();
-    let boton:HTMLElement = miObjMain.myFramework.getElementById("boton");
-    boton.textContent = "Listar";
-    boton.addEventListener("click", miObjMain);
-    
-    let btnCerrar: HTMLElement = miObjMain.myFramework.getElementById("btnCerrar");
-    btnCerrar.addEventListener("dblclick", miObjMain);
+    let btnNvoDisp: HTMLElement = miObjMain.myFramework.getElementById("nuevoDisp");
+    btnNvoDisp.addEventListener("dblclick", miObjMain);
     
 });
 
