@@ -105,7 +105,7 @@ public actualizarDispositivos() {
             }
         }
     };
-    xhr.open("POST", "http://localhost:8000/devices", true);
+    xhr.open("GET", "http://localhost:8000/devices", true);
     xhr.send();
 }
 
@@ -114,14 +114,83 @@ public actualizarDispositivos() {
 
 public handleEvent(ev: Event) {
     let objetoClick: HTMLInputElement = <HTMLInputElement>ev.target;
-    console.log(objetoClick);
+    //console.log(objetoClick.id);
+    const [tipo,id] = objetoClick.id.split("_");
+    //console.log(tipo , id);
+    // @ts-ignore
+    //console.log(document.getElementById(`tipodispositivo_${id}`).value);
+    let tipoDisp = document.getElementById(`tipodispositivo_${id}`).value;
+    let state;
+    if(tipoDisp == 0){ // tipo ON/OFF
+        // @ts-ignore
+        console.log("Checked? " ,document.getElementById(`check_${id}`).checked);
+        // @ts-ignore
+        state = document.getElementById(`check_${id}`).checked ? 1:0;
+    }
+    else{
+        // @ts-ignore
+        state = document.getElementById(`rango_${id}`).value;
+    }
+    //console.log(document.getElementById(`nombre_${id}`).innerHTML);
+    const body = {
+        "id": parseInt(id),
+        "name": document.getElementById(`nombre_${id}`).innerHTML,
+        "description": document.getElementById(`descripcion_${id}`).innerHTML,
+        "state": parseInt(state) ,
+        "type": parseInt(tipoDisp)
+    }
+    console.log(body);
+    switch(tipo){
+        case "delete":{
+            this.deleteDisp(parseInt(id));
+            break;
+        }
+        case "check":
+        case "range":
+        case "edit" :{
+            this.updateDisp(body);
+            break;
+        }
+        
+    }
+    this.actualizarDispositivos();
 }
+
+deleteDisp(id: number){
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+                console.log(`Se borro el dispositivo id_${id}`);
+            }
+        }
+    }
+    xhr.open("DELETE", `http://localhost:8000/devices/${id}`, true);
+    xhr.send(null);
+}
+
+updateDisp(body: any){
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+                console.log(`Se actualizó el dispositivo id_${body.id}`);
+            }
+        }
+    }
+    xhr.open("POST", `http://localhost:8000/devices/${body.id}`, true);
+    xhr.setRequestHeader("Content-type","application/json");
+    xhr.send(JSON.stringify(body));
+}
+
+
+
+
 
 responsePost(status: number, response: string) {
     alert(response);
 }
-
-    
+   
 }
 window.addEventListener("load", ()=> {
     let miObjMain: Main = new Main();
@@ -129,8 +198,7 @@ window.addEventListener("load", ()=> {
     let btnNvoDisp: HTMLElement = miObjMain.myFramework.getElementById("nuevoDisp");
     btnNvoDisp.addEventListener("click", miObjMain);
     let modal = miObjMain.myFramework.getElementById("modalNvoDisp");
-    modal.addEventListener("click", miObjMain);
-    
+    modal.addEventListener("click", miObjMain);    
 });
 
 
